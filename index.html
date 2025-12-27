@@ -599,27 +599,33 @@
                 }
             }
         });
-    </script>
+<script>
     // ==============================
-// CEF / WINFORMS BRIDGE
-// ==============================
+    // WEBVIEW BRIDGE (GET / SET LUA)
+    // ==============================
 
-window.getActiveLuaCode = function () {
-    try {
-        if (!activeTabId || !Array.isArray(tabs)) {
+    window.getActiveLuaCode = function () {
+        try {
+            if (!activeTabId || !Array.isArray(tabs)) return "";
+            const tab = tabs.find(t => t.id === activeTabId);
+            if (!tab || !tab.editor) return "";
+            return tab.editor.getValue();
+        } catch {
             return "";
         }
+    };
 
-        const tab = tabs.find(t => t.id === activeTabId);
-        if (!tab || !tab.editor) {
-            return "";
-        }
-
-        return tab.editor.getValue();
-    } catch (e) {
-        return "";
-    }
-};
+    window.setActiveLuaCode = function (code) {
+        try {
+            if (!activeTabId || !Array.isArray(tabs)) return;
+            const tab = tabs.find(t => t.id === activeTabId);
+            if (!tab || !tab.editor) return;
+            tab.editor.setValue(code || "");
+            tab.modified = false;
+            renderTabs();
+        } catch {}
+    };
+</script>
 
 </body>
 </html>
