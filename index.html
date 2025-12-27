@@ -600,5 +600,14 @@
             }
         });
     </script>
+    // ===== EXPOSED FOR CEF / WINFORMS =====
+window.getActiveLuaCode = function () {
+    if (!activeTabId) return "";
+
+    const tab = tabs.find(t => t.id === activeTabId);
+    if (!tab || !tab.editor) return "";
+
+    return tab.editor.getValue();
+};
 </body>
 </html>
