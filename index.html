@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lua Editor - Orange Edition</title>
+    <title>Lua Editor - Goonware Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
     <style>
         * {
@@ -14,7 +14,7 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #0F0F0F;
+            background: #1E1E1E;
             color: #fff;
             overflow: hidden;
             height: 100vh;
@@ -24,44 +24,48 @@
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background: #0F0F0F;
+            background: #1E1E1E;
         }
 
         .tab-bar {
-            background: #0F0F0F;
+            background: #1A1A1A;
             display: flex;
             align-items: center;
-            padding: 8px 12px;
-            gap: 8px;
-            border-bottom: 1px solid #1a1a1a;
-            min-height: 48px;
+            padding: 6px 12px;
+            gap: 6px;
+            border-bottom: 1px solid #0A0A0A;
+            min-height: 44px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .tab {
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 6px 12px;
-            background: #1a1a1a;
+            padding: 6px 14px;
+            background: #252525;
             border-radius: 6px;
             cursor: pointer;
             user-select: none;
-            transition: all 0.2s;
-            font-size: 13px;
+            transition: all 0.2s ease;
+            font-size: 12px;
             font-weight: 500;
-            color: #888;
+            color: #7F7F7F;
             border: 1px solid transparent;
+            position: relative;
         }
 
         .tab:hover {
-            background: #252525;
-            color: #fff;
+            background: #2D2D2D;
+            color: #B8B8B8;
+            transform: translateY(-1px);
         }
 
         .tab.active {
-            background: #1a1a1a;
-            color: #FF9000;
-            border: 1px solid #FF900044;
+            background: #2D2D2D;
+            color: #B89968;
+            border: 1px solid #B8996844;
+            box-shadow: 0 0 12px rgba(184, 153, 104, 0.2);
         }
 
         .tab-label {
@@ -73,7 +77,14 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #FF9000;
+            background: #B89968;
+            box-shadow: 0 0 6px rgba(184, 153, 104, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         .tab-close {
@@ -84,42 +95,45 @@
             height: 18px;
             border-radius: 4px;
             color: #555;
-            font-size: 14px;
+            font-size: 16px;
             transition: all 0.2s;
         }
 
         .tab-close:hover {
-            background: #FF9000;
+            background: #B89968;
             color: #000;
+            box-shadow: 0 0 8px rgba(184, 153, 104, 0.4);
         }
 
         .new-tab-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
-            background: transparent;
+            width: 32px;
+            height: 32px;
+            background: #252525;
             border: 1px solid #333;
             border-radius: 6px;
-            color: #FF9000;
+            color: #B89968;
             cursor: pointer;
             font-size: 18px;
             transition: all 0.2s;
-            margin-right: 10px;
+            margin-left: 4px;
         }
 
         .new-tab-btn:hover {
-            background: #FF9000;
-            color: #000;
-            border-color: #FF9000;
+            background: #B89968;
+            color: #1A1A1A;
+            border-color: #B89968;
+            box-shadow: 0 0 16px rgba(184, 153, 104, 0.4);
+            transform: scale(1.05);
         }
 
         .editor-wrapper {
             flex: 1;
             position: relative;
             overflow: hidden;
-            background: #0F0F0F;
+            background: #1E1E1E;
         }
 
         .editor-pane {
@@ -129,7 +143,7 @@
             right: 0;
             bottom: 0;
             opacity: 0;
-            transition: opacity 0.2s;
+            transition: opacity 0.25s ease;
             pointer-events: none;
         }
 
@@ -140,12 +154,12 @@
 
         .context-menu {
             position: fixed;
-            background: #1a1a1a;
-            border: 1px solid #FF900033;
+            background: #252525;
+            border: 1px solid #B8996833;
             border-radius: 8px;
             padding: 6px;
             z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 16px rgba(184, 153, 104, 0.15);
             min-width: 180px;
         }
 
@@ -153,14 +167,15 @@
             padding: 8px 12px;
             cursor: pointer;
             font-size: 13px;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: all 0.2s;
-            color: #fff;
+            color: #E8E8E8;
         }
 
         .context-menu-item:hover {
-            background: #FF9000;
-            color: #000;
+            background: #B89968;
+            color: #1A1A1A;
+            box-shadow: 0 0 8px rgba(184, 153, 104, 0.3);
         }
 
         .context-menu-separator {
@@ -171,10 +186,16 @@
 
         /* Monaco editor scrollbar customization */
         .monaco-editor .scrollbar.vertical .slider {
-            background: rgba(255, 144, 0, 0.2) !important;
+            background: rgba(184, 153, 104, 0.2) !important;
         }
         .monaco-editor .scrollbar.vertical .slider:hover {
-            background: rgba(255, 144, 0, 0.4) !important;
+            background: rgba(184, 153, 104, 0.4) !important;
+        }
+        .monaco-editor .scrollbar.horizontal .slider {
+            background: rgba(184, 153, 104, 0.2) !important;
+        }
+        .monaco-editor .scrollbar.horizontal .slider:hover {
+            background: rgba(184, 153, 104, 0.4) !important;
         }
     </style>
 </head>
@@ -219,32 +240,41 @@
         require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
         require(['vs/editor/editor.main'], function() {
-            monaco.editor.defineTheme('custom-orange', {
+            monaco.editor.defineTheme('goonware-theme', {
                 base: 'vs-dark',
                 inherit: true,
                 rules: [
                     { token: 'comment', foreground: '666666', fontStyle: 'italic' },
-                    { token: 'keyword', foreground: 'FF9000', fontStyle: 'bold' },
-                    { token: 'string', foreground: 'FFB347' },
-                    { token: 'number', foreground: 'FFC978' },
-                    { token: 'type.identifier', foreground: 'FF9000' },
-                    { token: 'operator', foreground: 'FF9000' },
+                    { token: 'keyword', foreground: 'B89968', fontStyle: 'bold' },
+                    { token: 'string', foreground: 'C9B899' },
+                    { token: 'number', foreground: 'D4C4A8' },
+                    { token: 'type.identifier', foreground: 'B89968' },
+                    { token: 'operator', foreground: 'A68B6F' },
+                    { token: 'delimiter', foreground: '888888' },
                 ],
                 colors: {
-                    'editor.background': '#0F0F0F',
-                    'editor.foreground': '#FFFFFF',
-                    'editor.lineHighlightBackground': '#1A1A1A',
-                    'editorCursor.foreground': '#FF9000',
-                    'editor.selectionBackground': '#FF900033',
-                    'editor.inactiveSelectionBackground': '#FF900015',
-                    'editorLineNumber.foreground': '#444444',
-                    'editorLineNumber.activeForeground': '#FF9000',
-                    'minimap.background': '#0F0F0F',
-                    'editorBracketMatch.background': '#FF900044',
-                    'editorBracketMatch.border': '#FF9000',
-                    'editorSuggestWidget.background': '#1a1a1a',
-                    'editorSuggestWidget.border': '#FF900033',
-                    'editorSuggestWidget.selectedBackground': '#FF900033',
+                    'editor.background': '#1E1E1E',
+                    'editor.foreground': '#E8E8E8',
+                    'editor.lineHighlightBackground': '#252525',
+                    'editorCursor.foreground': '#B89968',
+                    'editor.selectionBackground': '#B8996833',
+                    'editor.inactiveSelectionBackground': '#B8996815',
+                    'editorLineNumber.foreground': '#4A4A4A',
+                    'editorLineNumber.activeForeground': '#B89968',
+                    'minimap.background': '#1A1A1A',
+                    'editorBracketMatch.background': '#B8996844',
+                    'editorBracketMatch.border': '#B89968',
+                    'editorSuggestWidget.background': '#252525',
+                    'editorSuggestWidget.border': '#B8996833',
+                    'editorSuggestWidget.selectedBackground': '#B8996833',
+                    'editorSuggestWidget.highlightForeground': '#B89968',
+                    'editorWidget.background': '#252525',
+                    'editorWidget.border': '#B8996833',
+                    'editorHoverWidget.background': '#252525',
+                    'editorHoverWidget.border': '#B8996833',
+                    'scrollbarSlider.background': '#B8996820',
+                    'scrollbarSlider.hoverBackground': '#B8996840',
+                    'scrollbarSlider.activeBackground': '#B8996860',
                 }
             });
 
@@ -340,7 +370,7 @@
             const editor = monaco.editor.create(editorPane, {
                 value: content,
                 language: 'lua',
-                theme: 'custom-orange',
+                theme: 'goonware-theme',
                 automaticLayout: true,
                 fontSize: 14,
                 fontFamily: "'Fira Code', 'Consolas', 'Monaco', monospace",
@@ -355,7 +385,8 @@
                 autoClosingQuotes: 'always',
                 cursorBlinking: 'smooth',
                 cursorSmoothCaretAnimation: 'on',
-                padding: { top: 16, bottom: 16 }
+                padding: { top: 16, bottom: 16 },
+                smoothScrolling: true,
             });
 
             editor.onDidChangeModelContent(() => {
@@ -464,54 +495,25 @@
         function newFile() { createNewTab(); }
 
         window.getActiveLuaCode = function () {
-            const tab = tabs.find(t => t.id === activeTabId);
-            return tab ? tab.editor.getValue() : "";
-        };
-
-        window.setActiveLuaCode = function (code) {
-            const tab = tabs.find(t => t.id === activeTabId);
-            if (tab) { tab.editor.setValue(code || ""); tab.modified = false; renderTabs(); }
-        };
-              window.getActiveLuaCode = function () {
-
             try {
-
                 if (!activeTabId || !Array.isArray(tabs)) return "";
-
                 const tab = tabs.find(t => t.id === activeTabId);
-
                 if (!tab || !tab.editor) return "";
-
                 return tab.editor.getValue();
-
             } catch {
-
                 return "";
-
             }
-
         };
 
-
-
         window.setActiveLuaCode = function (code) {
-
             try {
-
                 if (!activeTabId || !Array.isArray(tabs)) return;
-
                 const tab = tabs.find(t => t.id === activeTabId);
-
                 if (!tab || !tab.editor) return;
-
                 tab.editor.setValue(code || "");
-
                 tab.modified = false;
-
                 renderTabs();
-
             } catch {}
-
         };
     </script>
 </body>
