@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lua Editor - Goonware Edition</title>
+    <title>Lua Editor - Blue Edition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
     <style>
         * {
@@ -63,9 +63,9 @@
 
         .tab.active {
             background: #2D2D2D;
-            color: #B89968;
-            border: 1px solid #B8996844;
-            box-shadow: 0 0 12px rgba(184, 153, 104, 0.2);
+            color: #6BB6FF;
+            border: 1px solid #6BB6FF44;
+            box-shadow: 0 0 12px rgba(107, 182, 255, 0.2);
         }
 
         .tab-label {
@@ -77,8 +77,8 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #B89968;
-            box-shadow: 0 0 6px rgba(184, 153, 104, 0.6);
+            background: #6BB6FF;
+            box-shadow: 0 0 6px rgba(107, 182, 255, 0.6);
             animation: pulse 2s infinite;
         }
 
@@ -100,9 +100,9 @@
         }
 
         .tab-close:hover {
-            background: #B89968;
+            background: #6BB6FF;
             color: #000;
-            box-shadow: 0 0 8px rgba(184, 153, 104, 0.4);
+            box-shadow: 0 0 8px rgba(107, 182, 255, 0.4);
         }
 
         .new-tab-btn {
@@ -114,7 +114,7 @@
             background: #252525;
             border: 1px solid #333;
             border-radius: 6px;
-            color: #B89968;
+            color: #6BB6FF;
             cursor: pointer;
             font-size: 18px;
             transition: all 0.2s;
@@ -122,10 +122,10 @@
         }
 
         .new-tab-btn:hover {
-            background: #B89968;
+            background: #6BB6FF;
             color: #1A1A1A;
-            border-color: #B89968;
-            box-shadow: 0 0 16px rgba(184, 153, 104, 0.4);
+            border-color: #6BB6FF;
+            box-shadow: 0 0 16px rgba(107, 182, 255, 0.4);
             transform: scale(1.05);
         }
 
@@ -155,11 +155,11 @@
         .context-menu {
             position: fixed;
             background: #252525;
-            border: 1px solid #B8996833;
+            border: 1px solid #6BB6FF33;
             border-radius: 8px;
             padding: 6px;
             z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 16px rgba(184, 153, 104, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 16px rgba(107, 182, 255, 0.15);
             min-width: 180px;
         }
 
@@ -173,9 +173,9 @@
         }
 
         .context-menu-item:hover {
-            background: #B89968;
+            background: #6BB6FF;
             color: #1A1A1A;
-            box-shadow: 0 0 8px rgba(184, 153, 104, 0.3);
+            box-shadow: 0 0 8px rgba(107, 182, 255, 0.3);
         }
 
         .context-menu-separator {
@@ -186,16 +186,16 @@
 
         /* Monaco editor scrollbar customization */
         .monaco-editor .scrollbar.vertical .slider {
-            background: rgba(184, 153, 104, 0.2) !important;
+            background: rgba(107, 182, 255, 0.2) !important;
         }
         .monaco-editor .scrollbar.vertical .slider:hover {
-            background: rgba(184, 153, 104, 0.4) !important;
+            background: rgba(107, 182, 255, 0.4) !important;
         }
         .monaco-editor .scrollbar.horizontal .slider {
-            background: rgba(184, 153, 104, 0.2) !important;
+            background: rgba(107, 182, 255, 0.2) !important;
         }
         .monaco-editor .scrollbar.horizontal .slider:hover {
-            background: rgba(184, 153, 104, 0.4) !important;
+            background: rgba(107, 182, 255, 0.4) !important;
         }
     </style>
 </head>
@@ -240,41 +240,41 @@
         require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
 
         require(['vs/editor/editor.main'], function() {
-            monaco.editor.defineTheme('goonware-theme', {
+            monaco.editor.defineTheme('blue-theme', {
                 base: 'vs-dark',
                 inherit: true,
                 rules: [
                     { token: 'comment', foreground: '666666', fontStyle: 'italic' },
-                    { token: 'keyword', foreground: 'B89968', fontStyle: 'bold' },
-                    { token: 'string', foreground: 'C9B899' },
-                    { token: 'number', foreground: 'D4C4A8' },
-                    { token: 'type.identifier', foreground: 'B89968' },
-                    { token: 'operator', foreground: 'A68B6F' },
+                    { token: 'keyword', foreground: '6BB6FF', fontStyle: 'bold' },
+                    { token: 'string', foreground: '9DCDFF' },
+                    { token: 'number', foreground: 'B4D9FF' },
+                    { token: 'type.identifier', foreground: '6BB6FF' },
+                    { token: 'operator', foreground: '5A9FE6' },
                     { token: 'delimiter', foreground: '888888' },
                 ],
                 colors: {
                     'editor.background': '#1E1E1E',
                     'editor.foreground': '#E8E8E8',
                     'editor.lineHighlightBackground': '#252525',
-                    'editorCursor.foreground': '#B89968',
-                    'editor.selectionBackground': '#B8996833',
-                    'editor.inactiveSelectionBackground': '#B8996815',
+                    'editorCursor.foreground': '#6BB6FF',
+                    'editor.selectionBackground': '#6BB6FF33',
+                    'editor.inactiveSelectionBackground': '#6BB6FF15',
                     'editorLineNumber.foreground': '#4A4A4A',
-                    'editorLineNumber.activeForeground': '#B89968',
+                    'editorLineNumber.activeForeground': '#6BB6FF',
                     'minimap.background': '#1A1A1A',
-                    'editorBracketMatch.background': '#B8996844',
-                    'editorBracketMatch.border': '#B89968',
+                    'editorBracketMatch.background': '#6BB6FF44',
+                    'editorBracketMatch.border': '#6BB6FF',
                     'editorSuggestWidget.background': '#252525',
-                    'editorSuggestWidget.border': '#B8996833',
-                    'editorSuggestWidget.selectedBackground': '#B8996833',
-                    'editorSuggestWidget.highlightForeground': '#B89968',
+                    'editorSuggestWidget.border': '#6BB6FF33',
+                    'editorSuggestWidget.selectedBackground': '#6BB6FF33',
+                    'editorSuggestWidget.highlightForeground': '#6BB6FF',
                     'editorWidget.background': '#252525',
-                    'editorWidget.border': '#B8996833',
+                    'editorWidget.border': '#6BB6FF33',
                     'editorHoverWidget.background': '#252525',
-                    'editorHoverWidget.border': '#B8996833',
-                    'scrollbarSlider.background': '#B8996820',
-                    'scrollbarSlider.hoverBackground': '#B8996840',
-                    'scrollbarSlider.activeBackground': '#B8996860',
+                    'editorHoverWidget.border': '#6BB6FF33',
+                    'scrollbarSlider.background': '#6BB6FF20',
+                    'scrollbarSlider.hoverBackground': '#6BB6FF40',
+                    'scrollbarSlider.activeBackground': '#6BB6FF60',
                 }
             });
 
@@ -370,7 +370,7 @@
             const editor = monaco.editor.create(editorPane, {
                 value: content,
                 language: 'lua',
-                theme: 'goonware-theme',
+                theme: 'blue-theme',
                 automaticLayout: true,
                 fontSize: 14,
                 fontFamily: "'Fira Code', 'Consolas', 'Monaco', monospace",
