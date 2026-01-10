@@ -213,6 +213,7 @@
         let activeTabId = null;
         let tabCounter = 0;
         let draggedTab = null;
+        let currentTheme = 'blue-theme';
 
         const luaKeywords = [
             'and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function',
@@ -275,6 +276,33 @@
                     'scrollbarSlider.background': '#6BB6FF20',
                     'scrollbarSlider.hoverBackground': '#6BB6FF40',
                     'scrollbarSlider.activeBackground': '#6BB6FF60',
+                }
+            });
+
+            monaco.editor.defineTheme('og-theme', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [
+                    { token: 'comment', foreground: '7C7C7C', fontStyle: 'italic' },
+                    { token: 'keyword', foreground: 'C586C0', fontStyle: 'bold' },
+                    { token: 'string', foreground: 'CE9178' },
+                    { token: 'number', foreground: 'B5CEA8' },
+                    { token: 'type.identifier', foreground: '4EC9B0' },
+                    { token: 'operator', foreground: 'D4D4D4' },
+                    { token: 'delimiter', foreground: 'D4D4D4' },
+                ],
+                colors: {
+                    'editor.background': '#1E1E1E',
+                    'editor.foreground': '#D4D4D4',
+                    'editor.lineHighlightBackground': '#282828',
+                    'editorCursor.foreground': '#AEAFAD',
+                    'editor.selectionBackground': '#264F78',
+                    'editor.inactiveSelectionBackground': '#3A3D41',
+                    'editorLineNumber.foreground': '#858585',
+                    'editorLineNumber.activeForeground': '#C6C6C6',
+                    'minimap.background': '#1E1E1E',
+                    'editorBracketMatch.background': '#0064001A',
+                    'editorBracketMatch.border': '#888888',
                 }
             });
 
@@ -370,7 +398,7 @@
             const editor = monaco.editor.create(editorPane, {
                 value: content,
                 language: 'lua',
-                theme: 'blue-theme',
+                theme: currentTheme,
                 automaticLayout: true,
                 fontSize: 14,
                 fontFamily: "'Fira Code', 'Consolas', 'Monaco', monospace",
@@ -494,6 +522,7 @@
 
         function newFile() { createNewTab(); }
 
+        // C# Integration Functions
         window.getActiveLuaCode = function () {
             try {
                 if (!activeTabId || !Array.isArray(tabs)) return "";
@@ -514,6 +543,19 @@
                 tab.modified = false;
                 renderTabs();
             } catch {}
+        };
+
+        window.ToggleTheme = function() {
+            try {
+                currentTheme = (currentTheme === 'blue-theme') ? 'og-theme' : 'blue-theme';
+                tabs.forEach(tab => {
+                    if (tab.editor) {
+                        monaco.editor.setTheme(currentTheme);
+                    }
+                });
+            } catch (e) {
+                console.error('Theme toggle error:', e);
+            }
         };
     </script>
 </body>
