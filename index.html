@@ -3,513 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lua Editor - Dark Edition</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/editor/editor.main.min.css">
+    <title>Lua Editor</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #000000;
-            color: #fff;
-            overflow: hidden;
+            background: #0d0d0d;
             height: 100vh;
-        }
-
-        .editor-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background: #000000;
-        }
-
-        .tab-bar {
-            background: #000000;
-            display: flex;
-            align-items: center;
-            padding: 0;
-            gap: 0;
-            border-bottom: 1px solid #1E1E1E;
-            min-height: 35px;
-        }
-
-        .tab {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 16px;
-            background: #2D2D30;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.1s ease;
-            font-size: 13px;
-            font-weight: 400;
-            color: #969696;
-            border-right: 1px solid #1E1E1E;
-            position: relative;
-            height: 35px;
-        }
-
-        .tab:hover {
-            background: #2D2D30;
-            color: #CCCCCC;
-        }
-
-        .tab.active {
-            background: #000000;
-            color: #FFFFFF;
-            border-top: 1px solid #007ACC;
-        }
-
-        .tab-label {
-            flex: 1;
-            white-space: nowrap;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .tab-modified {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #FFFFFF;
-            margin-left: 4px;
-        }
-
-        .tab-close {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            border-radius: 3px;
-            color: #858585;
-            font-size: 18px;
-            transition: all 0.1s;
-            margin-left: 4px;
-        }
-
-        .tab-close:hover {
-            background: #3E3E42;
-            color: #FFFFFF;
-        }
-
-        .new-tab-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 35px;
-            height: 35px;
-            background: transparent;
-            border: none;
-            color: #858585;
-            cursor: pointer;
-            font-size: 20px;
-            transition: all 0.1s;
-        }
-
-        .new-tab-btn:hover {
-            background: #2D2D30;
-            color: #CCCCCC;
-        }
-
-        .editor-wrapper {
-            flex: 1;
-            position: relative;
             overflow: hidden;
-            background: #000000;
         }
-
-        .editor-pane {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            opacity: 0;
-            transition: opacity 0.15s ease;
-            pointer-events: none;
-        }
-
-        .editor-pane.active {
-            opacity: 1;
-            pointer-events: all;
-        }
-
-        .context-menu {
-            position: fixed;
-            background: #252526;
-            border: 1px solid #454545;
-            padding: 4px 0;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-            min-width: 180px;
-        }
-
-        .context-menu-item {
-            padding: 6px 20px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: all 0.1s;
-            color: #CCCCCC;
-        }
-
-        .context-menu-item:hover {
-            background: #094771;
-            color: #FFFFFF;
-        }
-
-        .context-menu-separator {
-            height: 1px;
-            background: #454545;
-            margin: 4px 0;
+        
+        #editor {
+            width: 100%;
+            height: 100vh;
         }
     </style>
 </head>
 <body>
-    <div class="editor-container">
-        <div class="tab-bar" id="tabBar">
-            <button class="new-tab-btn" onclick="newFile()" title="New File">+</button>
-        </div>
-        <div class="editor-wrapper" id="editorWrapper"></div>
-    </div>
+    <div id="editor"></div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <script>
-        let tabs = [];
-        let activeTabId = null;
-        let tabCounter = 0;
-        let draggedTab = null;
-        let currentTheme = 'vs-dark';
-
-        const luaKeywords = [
-            'and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for', 'function',
-            'if', 'in', 'local', 'nil', 'not', 'or', 'repeat', 'return', 'then', 'true',
-            'until', 'while', 'goto'
-        ];
-
-        const luaBuiltins = [
-            'print', 'assert', 'collectgarbage', 'dofile', 'error', 'getmetatable',
-            'ipairs', 'load', 'loadfile', 'next', 'pairs', 'pcall', 'rawequal',
-            'rawget', 'rawset', 'select', 'setmetatable', 'tonumber', 'tostring',
-            'type', 'xpcall', '_G', '_VERSION', 'require', 'package', 'string',
-            'table', 'math', 'io', 'os', 'coroutine', 'debug'
-        ];
-
-        const luaSnippets = [
-            { label: 'func', insertText: 'function ${1:name}(${2:args})\n\t${3:-- body}\nend', detail: 'Function declaration' },
-            { label: 'for', insertText: 'for ${1:i}=${2:1},${3:10} do\n\t${4:-- body}\nend', detail: 'For loop' },
-            { label: 'while', insertText: 'while ${1:condition} do\n\t${2:-- body}\nend', detail: 'While loop' },
-            { label: 'if', insertText: 'if ${1:condition} then\n\t${2:-- body}\nend', detail: 'If statement' },
-            { label: 'local', insertText: 'local ${1:variable} = ${2:value}', detail: 'Local variable' },
-            { label: 'table', insertText: 'local ${1:tbl} = {\n\t${2:key} = ${3:value}\n}', detail: 'Table declaration' }
-        ];
-
-        require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
-
-        require(['vs/editor/editor.main'], function() {
-            // Define theme FIRST before anything else
-            monaco.editor.defineTheme('dark-theme', {
-                base: 'vs-dark',
-                inherit: true,
-                rules: [
-                    { token: 'comment', foreground: '6A9955', fontStyle: 'italic' },
-                    { token: 'keyword', foreground: 'C586C0', fontStyle: 'bold' },
-                    { token: 'string', foreground: 'CE9178' },
-                    { token: 'number', foreground: 'B5CEA8' },
-                    { token: 'type.identifier', foreground: '4EC9B0' },
-                    { token: 'operator', foreground: 'D4D4D4' },
-                    { token: 'delimiter', foreground: 'D4D4D4' },
-                    { token: 'identifier', foreground: '9CDCFE' },
-                ],
-                colors: {
-                    'editor.background': '#000000',
-                    'editor.foreground': '#D4D4D4',
-                    'editor.lineHighlightBackground': '#0A0A0A',
-                    'editorCursor.foreground': '#AEAFAD',
-                    'editor.selectionBackground': '#264F78',
-                    'editor.inactiveSelectionBackground': '#3A3D41',
-                    'editorLineNumber.foreground': '#858585',
-                    'editorLineNumber.activeForeground': '#C6C6C6',
-                    'minimap.background': '#000000',
-                    'editorBracketMatch.background': '#0064001A',
-                    'editorBracketMatch.border': '#888888',
-                    'editorSuggestWidget.background': '#252526',
-                    'editorSuggestWidget.border': '#454545',
-                    'editorSuggestWidget.selectedBackground': '#094771',
-                    'editorSuggestWidget.highlightForeground': '#0097FB',
-                    'editorWidget.background': '#252526',
-                    'editorWidget.border': '#454545',
-                    'editorHoverWidget.background': '#252526',
-                    'editorHoverWidget.border': '#454545',
-                    'scrollbarSlider.background': '#79797966',
-                    'scrollbarSlider.hoverBackground': '#646464B3',
-                    'scrollbarSlider.activeBackground': '#BFBFBF66',
-                }
-            });
-
-            // Set as default theme immediately
-            monaco.editor.setTheme('dark-theme');
-
-            monaco.languages.register({ id: 'lua' });
-            
-            monaco.languages.setMonarchTokensProvider('lua', {
-                keywords: luaKeywords,
-                builtins: luaBuiltins,
-                tokenizer: {
-                    root: [
-                        [/[a-zA-Z_]\w*/, {
-                            cases: {
-                                '@keywords': 'keyword',
-                                '@builtins': 'type.identifier',
-                                '@default': 'identifier'
-                            }
-                        }],
-                        [/\d+(\.\d+)?/, 'number'],
-                        [/"/, 'string', '@string_double'],
-                        [/'/, 'string', '@string_single'],
-                        [/--\[\[/, 'comment', '@comment'],
-                        [/--.*$/, 'comment'],
-                    ],
-                    comment: [
-                        [/[^\]]+/, 'comment'],
-                        [/\]\]/, 'comment', '@pop'],
-                        [/[\]]/, 'comment']
-                    ],
-                    string_double: [
-                        [/[^\\"]+/, 'string'],
-                        [/\\./, 'string.escape'],
-                        [/"/, 'string', '@pop']
-                    ],
-                    string_single: [
-                        [/[^\\']+/, 'string'],
-                        [/\\./, 'string.escape'],
-                        [/'/, 'string', '@pop']
-                    ]
-                }
-            });
-
-            monaco.languages.registerCompletionItemProvider('lua', {
-                provideCompletionItems: (model, position) => {
-                    const word = model.getWordUntilPosition(position);
-                    const range = {
-                        startLineNumber: position.lineNumber,
-                        endLineNumber: position.lineNumber,
-                        startColumn: word.startColumn,
-                        endColumn: word.endColumn
-                    };
-
-                    const keywordSuggestions = luaKeywords.map(keyword => ({
-                        label: keyword,
-                        kind: monaco.languages.CompletionItemKind.Keyword,
-                        insertText: keyword,
-                        range: range
-                    }));
-
-                    const builtinSuggestions = luaBuiltins.map(builtin => ({
-                        label: builtin,
-                        kind: monaco.languages.CompletionItemKind.Function,
-                        insertText: builtin,
-                        range: range,
-                        detail: 'Built-in'
-                    }));
-
-                    const snippetSuggestions = luaSnippets.map(snippet => ({
-                        label: snippet.label,
-                        kind: monaco.languages.CompletionItemKind.Snippet,
-                        insertText: snippet.insertText,
-                        insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                        range: range,
-                        detail: snippet.detail
-                    }));
-
-                    return { suggestions: [...keywordSuggestions, ...builtinSuggestions, ...snippetSuggestions] };
-                }
-            });
-
-            // Set theme immediately after defining it
-            monaco.editor.setTheme('dark-theme');
-
-            createNewTab();
+        let editor;
+        
+        require.config({ 
+            paths: { 
+                vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' 
+            }
         });
-
-        function createNewTab(content = '') {
-            const id = `tab-${tabCounter}`;
-            const label = `Untitled Tab`;
-            tabCounter++;
-            
-            const editorPane = document.createElement('div');
-            editorPane.className = 'editor-pane';
-            editorPane.id = id;
-            document.getElementById('editorWrapper').appendChild(editorPane);
-
-            const editor = monaco.editor.create(editorPane, {
-                value: content,
+        
+        require(['vs/editor/editor.main'], function() {
+            editor = monaco.editor.create(document.getElementById('editor'), {
+                value: '--flow executer',
                 language: 'lua',
-                theme: 'dark-theme',
+                theme: 'vs-dark',
                 automaticLayout: true,
                 fontSize: 14,
-                fontFamily: "'Consolas', 'Courier New', monospace",
-                fontLigatures: false,
                 minimap: { enabled: true },
                 scrollBeyondLastLine: false,
+                wordWrap: 'on',
                 lineNumbers: 'on',
-                renderWhitespace: 'none',
                 folding: true,
-                bracketPairColorization: { enabled: true },
-                autoClosingBrackets: 'always',
-                autoClosingQuotes: 'always',
-                cursorBlinking: 'blink',
-                cursorSmoothCaretAnimation: 'off',
-                padding: { top: 0, bottom: 0 },
-                smoothScrolling: false,
-                lineDecorationsWidth: 10,
-                lineNumbersMinChars: 3,
+                renderWhitespace: 'selection',
+                cursorBlinking: 'smooth',
+                smoothScrolling: true,
+                fontLigatures: true,
+                suggestOnTriggerCharacters: true,
+                quickSuggestions: {
+                    other: true,
+                    comments: false,
+                    strings: false
+                },
+                tabSize: 4,
+                insertSpaces: true
             });
-
-            editor.onDidChangeModelContent(() => {
-                const tab = tabs.find(t => t.id === id);
-                if (tab && !tab.modified) {
-                    tab.modified = true;
-                    renderTabs();
+            
+            // Define custom dark theme
+            monaco.editor.defineTheme('luaCustom', {
+                base: 'vs-dark',
+                inherit: true,
+                rules: [],
+                colors: {
+                    'editor.background': '#0d0d0d'
                 }
             });
-
-            tabs.push({ id, label, editor, modified: false, element: null });
-            renderTabs();
-            switchTab(id);
-        }
-
-        function renderTabs() {
-            const tabBar = document.getElementById('tabBar');
-            tabBar.querySelectorAll('.tab').forEach(t => t.remove());
-
-            tabs.forEach((tab, index) => {
-                const tabEl = document.createElement('div');
-                tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''}`;
-                tabEl.draggable = true;
-                tabEl.innerHTML = `
-                    <span class="tab-label">${tab.label}</span>
-                    ${tab.modified ? '<span class="tab-modified"></span>' : ''}
-                    <span class="tab-close" onclick="closeTab(event, '${tab.id}')">×</span>
-                `;
-
-                tabEl.onclick = (e) => { if (!e.target.classList.contains('tab-close')) switchTab(tab.id); };
-                tabEl.oncontextmenu = (e) => { e.preventDefault(); showContextMenu(e, tab.id); };
-                
-                tabEl.ondragstart = (e) => { draggedTab = tab.id; tabEl.style.opacity = '0.5'; };
-                tabEl.ondragend = () => { tabEl.style.opacity = '1'; draggedTab = null; };
-                tabEl.ondragover = (e) => {
-                    e.preventDefault();
-                    if (draggedTab && draggedTab !== tab.id) {
-                        const draggedIndex = tabs.findIndex(t => t.id === draggedTab);
-                        const targetIndex = index;
-                        const draggedTabObj = tabs[draggedIndex];
-                        tabs.splice(draggedIndex, 1);
-                        tabs.splice(targetIndex, 0, draggedTabObj);
-                        renderTabs();
-                    }
-                };
-
-                tab.element = tabEl;
-                tabBar.insertBefore(tabEl, tabBar.lastElementChild);
-            });
-        }
-
-        function switchTab(id) {
-            activeTabId = id;
-            tabs.forEach(tab => {
-                const pane = document.getElementById(tab.id);
-                if (tab.id === id) {
-                    pane.classList.add('active');
-                    setTimeout(() => tab.editor.focus(), 50);
-                } else {
-                    pane.classList.remove('active');
-                }
-            });
-            renderTabs();
-        }
-
-        function closeTab(event, id) {
-            event.stopPropagation();
-            const tabIndex = tabs.findIndex(t => t.id === id);
-            if (tabIndex === -1) return;
-            const tab = tabs[tabIndex];
-            if (tab.modified && !confirm(`Close "${tab.label}" with unsaved changes?`)) return;
-
-            tab.editor.dispose();
-            document.getElementById(id).remove();
-            tabs.splice(tabIndex, 1);
-
-            if (tabs.length === 0) createNewTab();
-            else if (id === activeTabId) switchTab(tabs[Math.min(tabIndex, tabs.length - 1)].id);
-            renderTabs();
-        }
-
-        function showContextMenu(event, tabId) {
-            const existing = document.querySelector('.context-menu');
-            if (existing) existing.remove();
-            const menu = document.createElement('div');
-            menu.className = 'context-menu';
-            menu.style.left = event.pageX + 'px';
-            menu.style.top = event.pageY + 'px';
-            menu.innerHTML = `
-                <div class="context-menu-item" onclick="closeTab(event, '${tabId}')">Close</div>
-                <div class="context-menu-item" onclick="renameTab('${tabId}')">Rename</div>
-            `;
-            document.body.appendChild(menu);
-            setTimeout(() => {
-                document.addEventListener('click', function rm() { menu.remove(); document.removeEventListener('click', rm); });
-            }, 0);
-        }
-
-        function renameTab(id) {
-            const tab = tabs.find(t => t.id === id);
-            if (!tab) return;
-            const newName = prompt('Enter new name:', tab.label);
-            if (newName && newName.trim()) { tab.label = newName.trim(); renderTabs(); }
-        }
-
-        function newFile() { createNewTab(); }
-
-        // C# Integration Functions
-        window.getActiveLuaCode = function () {
-            try {
-                if (!activeTabId || !Array.isArray(tabs)) return "";
-                const tab = tabs.find(t => t.id === activeTabId);
-                if (!tab || !tab.editor) return "";
-                return tab.editor.getValue();
-            } catch {
-                return "";
-            }
-        };
-
-        window.setActiveLuaCode = function (code) {
-            try {
-                if (!activeTabId || !Array.isArray(tabs)) return;
-                const tab = tabs.find(t => t.id === activeTabId);
-                if (!tab || !tab.editor) return;
-                tab.editor.setValue(code || "");
-                tab.modified = false;
-                renderTabs();
-            } catch {}
-        };
-
-        window.ToggleTheme = function() {
-            try {
-                currentTheme = (currentTheme === 'dark-theme') ? 'vs-dark' : 'dark-theme';
-                tabs.forEach(tab => {
-                    if (tab.editor) {
-                        monaco.editor.setTheme(currentTheme);
-                    }
-                });
-            } catch (e) {
-                console.error('Theme toggle error:', e);
-            }
-        };
+            
+            monaco.editor.setTheme('luaCustom');
+            
+            // Function to get code
+            window.getCode = function() {
+                return editor ? editor.getValue() : '';
+            };
+        });
     </script>
 </body>
 </html>
