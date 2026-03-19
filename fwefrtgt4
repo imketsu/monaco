@@ -666,16 +666,6 @@ function Library:create_ui()
     UICorner2.CornerRadius = UDim.new(1, 0)
     UICorner2.Parent = Pin
     
-    local Divider = Instance.new('Frame')
-    Divider.Name = 'Divider'
-    Divider.BackgroundTransparency = 0
-    Divider.Position = UDim2.new(0.235, 0, 0, 0)
-    Divider.BorderColor3 = Color3.fromRGB(0, 0, 0)
-    Divider.Size = UDim2.new(0, 1, 0, 479)
-    Divider.BorderSizePixel = 0
-    Divider.BackgroundColor3 = ThemeColors.Border
-    Divider.Parent = Handler
-    
     -- Top header bar with search + FPS/Ping
     local TopBar = Instance.new('Frame')
     TopBar.Name = 'TopBar'
@@ -2678,6 +2668,271 @@ function Library:create_ui()
                 end)
 
                 return SliderManager
+            end
+
+            function ModuleManager:create_doubleslider(settings)
+                LayoutOrderModule = LayoutOrderModule + 1
+
+                local DoubleSliderManager = {}
+
+                if self._size == 0 then
+                    self._size = 11
+                end
+
+                self._size += 27
+
+                if ModuleManager._state then
+                    Module.Size = UDim2.fromOffset(241, 85 + self._size)
+                end
+
+                Options.Size = UDim2.fromOffset(241, self._size)
+
+                local DoubleSlider = Instance.new('TextButton')
+                DoubleSlider.FontFace = Font.new('rbxasset://fonts/families/SourceSansPro.json', Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+                DoubleSlider.TextSize = 14
+                DoubleSlider.TextColor3 = Color3.fromRGB(0, 0, 0)
+                DoubleSlider.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                DoubleSlider.Text = ''
+                DoubleSlider.AutoButtonColor = false
+                DoubleSlider.BackgroundTransparency = 0
+                DoubleSlider.Name = 'DoubleSlider'
+                DoubleSlider.Size = UDim2.new(0, 207, 0, 22)
+                DoubleSlider.BorderSizePixel = 0
+                DoubleSlider.BackgroundColor3 = ThemeColors.SecondaryBg
+                DoubleSlider.Parent = Options
+                DoubleSlider.LayoutOrder = LayoutOrderModule
+                
+                local TextLabel3 = Instance.new('TextLabel')
+                TextLabel3.FontFace = Font.new('rbxasset://fonts/families/GothamSSm.json', Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+                TextLabel3.TextSize = 11
+                TextLabel3.TextColor3 = ThemeColors.TextPrimary
+                TextLabel3.TextTransparency = 0.2
+                TextLabel3.Text = settings.title or "DoubleSlider"
+                TextLabel3.Size = UDim2.new(0, 153, 0, 13)
+                TextLabel3.Position = UDim2.new(0, 0, 0.05, 0)
+                TextLabel3.BackgroundTransparency = 1
+                TextLabel3.TextXAlignment = Enum.TextXAlignment.Left
+                TextLabel3.BorderSizePixel = 0
+                TextLabel3.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                TextLabel3.BackgroundColor3 = ThemeColors.SecondaryBg
+                TextLabel3.Parent = DoubleSlider
+                
+                local Drag = Instance.new('Frame')
+                Drag.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                Drag.AnchorPoint = Vector2.new(0.5, 1)
+                Drag.BackgroundTransparency = 0
+                Drag.Position = UDim2.new(0.5, 0, 0.95, 0)
+                Drag.Name = 'Drag'
+                Drag.Size = UDim2.new(0, 207, 0, 3)
+                Drag.BorderSizePixel = 0
+                Drag.BackgroundColor3 = ThemeColors.TertiaryBg
+                Drag.Parent = DoubleSlider
+                
+                local UICorner12 = Instance.new('UICorner')
+                UICorner12.CornerRadius = UDim.new(1, 0)
+                UICorner12.Parent = Drag
+                
+                -- Range fill (between the two dots)
+                local RangeFill = Instance.new('Frame')
+                RangeFill.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                RangeFill.AnchorPoint = Vector2.new(0, 0.5)
+                RangeFill.BackgroundTransparency = 0
+                RangeFill.Position = UDim2.new(0, 0, 0.5, 0)
+                RangeFill.Name = 'RangeFill'
+                RangeFill.Size = UDim2.new(0, 103, 0, 3)
+                RangeFill.BorderSizePixel = 0
+                RangeFill.BackgroundColor3 = ThemeColors.Primary
+                RangeFill.Parent = Drag
+                
+                local UICorner13 = Instance.new('UICorner')
+                UICorner13.CornerRadius = UDim.new(0, 3)
+                UICorner13.Parent = RangeFill
+                
+                local UIGradient3 = Instance.new('UIGradient')
+                UIGradient3.Color = ColorSequence.new{
+                    ColorSequenceKeypoint.new(0, ThemeColors.PrimaryLight),
+                    ColorSequenceKeypoint.new(1, ThemeColors.Accent)
+                }
+                UIGradient3.Parent = RangeFill
+                
+                -- Left dot
+                local LeftCircle = Instance.new('Frame')
+                LeftCircle.AnchorPoint = Vector2.new(0, 0.5)
+                LeftCircle.Name = 'LeftCircle'
+                LeftCircle.Position = UDim2.new(0, 0, 0.5, 0)
+                LeftCircle.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                LeftCircle.Size = UDim2.new(0, 6, 0, 6)
+                LeftCircle.BorderSizePixel = 0
+                LeftCircle.BackgroundColor3 = ThemeColors.Accent
+                LeftCircle.Parent = Drag
+                
+                local UICorner14 = Instance.new('UICorner')
+                UICorner14.CornerRadius = UDim.new(1, 0)
+                UICorner14.Parent = LeftCircle
+                
+                -- Right dot
+                local RightCircle = Instance.new('Frame')
+                RightCircle.AnchorPoint = Vector2.new(1, 0.5)
+                RightCircle.Name = 'RightCircle'
+                RightCircle.Position = UDim2.new(1, 0, 0.5, 0)
+                RightCircle.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                RightCircle.Size = UDim2.new(0, 6, 0, 6)
+                RightCircle.BorderSizePixel = 0
+                RightCircle.BackgroundColor3 = ThemeColors.Accent
+                RightCircle.Parent = Drag
+                
+                local UICorner15 = Instance.new('UICorner')
+                UICorner15.CornerRadius = UDim.new(1, 0)
+                UICorner15.Parent = RightCircle
+
+                -- Value display
+                local Value = Instance.new('TextLabel')
+                Value.FontFace = Font.new('rbxasset://fonts/families/GothamSSm.json', Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
+                Value.TextColor3 = ThemeColors.PrimaryLight
+                Value.TextTransparency = 0.2
+                Value.Text = '25-75'
+                Value.Name = 'Value'
+                Value.Size = UDim2.new(0, 42, 0, 13)
+                Value.AnchorPoint = Vector2.new(1, 0)
+                Value.Position = UDim2.new(1, 0, 0, 0)
+                Value.BackgroundTransparency = 1
+                Value.TextXAlignment = Enum.TextXAlignment.Right
+                Value.BorderSizePixel = 0
+                Value.BorderColor3 = Color3.fromRGB(0, 0, 0)
+                Value.TextSize = 10
+                Value.BackgroundColor3 = ThemeColors.SecondaryBg
+                Value.Parent = DoubleSlider
+
+                -- Initialize default values
+                local min_value = settings.minimum_value or 0
+                local max_value = settings.maximum_value or 100
+                local default_min = settings.default_min or math.floor(min_value + (max_value - min_value) * 0.25)
+                local default_max = settings.default_max or math.floor(min_value + (max_value - min_value) * 0.75)
+
+                -- Store current values
+                local current_min = default_min
+                local current_max = default_max
+                local dragging_dot = nil -- 'left', 'right', or nil
+
+                function DoubleSliderManager:set_range(min_val, max_val)
+                    -- Ensure values are within bounds and min <= max
+                    current_min = math.clamp(min_val, min_value, max_value)
+                    current_max = math.clamp(max_val, min_value, max_value)
+                    
+                    if current_min > current_max then
+                        current_min, current_max = current_max, current_min
+                    end
+
+                    -- Calculate positions (0 to 1)
+                    local min_pos = (current_min - min_value) / (max_value - min_value)
+                    local max_pos = (current_max - min_value) / (max_value - min_value)
+                    
+                    -- Update UI
+                    local min_pixel = math.clamp(min_pos, 0, 1) * Drag.Size.X.Offset
+                    local max_pixel = math.clamp(max_pos, 0, 1) * Drag.Size.X.Offset
+                    
+                    LeftCircle.Position = UDim2.new(0, min_pixel, 0.5, 0)
+                    RightCircle.Position = UDim2.new(1, -(Drag.Size.X.Offset - max_pixel), 0.5, 0)
+                    
+                    -- Update range fill
+                    local fill_size = max_pixel - min_pixel
+                    RangeFill.Size = UDim2.fromOffset(fill_size, Drag.Size.Y.Offset)
+                    RangeFill.Position = UDim2.fromOffset(min_pixel, 0)
+                    
+                    -- Update value display
+                    local display_min = settings.round_number and math.floor(current_min) or math.floor(current_min * 10) / 10
+                    local display_max = settings.round_number and math.floor(current_max) or math.floor(current_max * 10) / 10
+                    Value.Text = tostring(display_min) .. "-" .. tostring(display_max)
+
+                    -- Store in config
+                    if not Library._config._flags[settings.flag] then
+                        Library._config._flags[settings.flag] = {}
+                    end
+                    Library._config._flags[settings.flag].min = current_min
+                    Library._config._flags[settings.flag].max = current_max
+
+                    if settings.callback then
+                        settings.callback(current_min, current_max)
+                    end
+                end
+
+                function DoubleSliderManager:update_from_mouse(mouse_x)
+                    local relative_x = mouse_x - Drag.AbsolutePosition.X
+                    local percentage = math.clamp(relative_x / Drag.Size.X.Offset, 0, 1)
+                    local value = min_value + (max_value - min_value) * percentage
+                    
+                    if dragging_dot == 'left' then
+                        DoubleSliderManager:set_range(value, current_max)
+                    elseif dragging_dot == 'right' then
+                        DoubleSliderManager:set_range(current_min, value)
+                    end
+                end
+
+                function DoubleSliderManager:start_drag(dot_type)
+                    dragging_dot = dot_type
+                    
+                    Connections['doubleslider_drag_'..settings.flag] = mouse.Move:Connect(function()
+                        DoubleSliderManager:update_from_mouse(mouse.X)
+                    end)
+                    
+                    Connections['doubleslider_input_'..settings.flag] = UserInputService.InputEnded:Connect(function(input)
+                        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then
+                            return
+                        end
+
+                        dragging_dot = nil
+                        Connections.disconnect('doubleslider_drag_'..settings.flag)
+                        Connections.disconnect('doubleslider_input_'..settings.flag)
+
+                        if not settings.ignoresaved then
+                            Config.save(tostring(game.GameId), Library._config)
+                        end
+                    end)
+                end
+
+                -- Mouse interactions for dots
+                LeftCircle.InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        DoubleSliderManager:start_drag('left')
+                    end
+                end)
+
+                RightCircle.InputBegan:Connect(function(input, gameProcessed)
+                    if gameProcessed then return end
+                    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                        DoubleSliderManager:start_drag('right')
+                    end
+                end)
+
+                -- Click on drag bar to move nearest dot
+                DoubleSlider.MouseButton1Down:Connect(function()
+                    local mouse_x = mouse.X
+                    local relative_x = mouse_x - Drag.AbsolutePosition.X
+                    local percentage = math.clamp(relative_x / Drag.Size.X.Offset, 0, 1)
+                    
+                    -- Determine which dot is closer
+                    local min_pos = (current_min - min_value) / (max_value - min_value)
+                    local max_pos = (current_max - min_value) / (max_value - min_value)
+                    
+                    if math.abs(percentage - min_pos) < math.abs(percentage - max_pos) then
+                        DoubleSliderManager:start_drag('left')
+                        DoubleSliderManager:update_from_mouse(mouse_x)
+                    else
+                        DoubleSliderManager:start_drag('right')
+                        DoubleSliderManager:update_from_mouse(mouse_x)
+                    end
+                end)
+
+                -- Load saved values or use defaults
+                if Library:flag_type(settings.flag, 'table') and Library._config._flags[settings.flag] then
+                    local saved = Library._config._flags[settings.flag]
+                    DoubleSliderManager:set_range(saved.min or default_min, saved.max or default_max)
+                else
+                    DoubleSliderManager:set_range(default_min, default_max)
+                end
+
+                return DoubleSliderManager
             end
 
             function ModuleManager:create_dropdown(settings)
