@@ -644,7 +644,23 @@ function Library:create_ui()
     ClientName.TextSize = 22
     ClientName.BackgroundColor3 = ThemeColors.Background
     ClientName.Parent = Handler
-    
+
+    -- Minimize header button (left of client name)
+    local MinimizeHeaderBtn = Instance.new('ImageButton')
+    MinimizeHeaderBtn.Name = 'MinimizeHeaderBtn'
+    MinimizeHeaderBtn.Image = 'rbxassetid://83223115676135'
+    MinimizeHeaderBtn.ImageColor3 = ThemeColors.PrimaryLight
+    MinimizeHeaderBtn.BackgroundTransparency = 1
+    MinimizeHeaderBtn.BorderSizePixel = 0
+    MinimizeHeaderBtn.Size = UDim2.fromOffset(28, 28)
+    MinimizeHeaderBtn.AnchorPoint = Vector2.new(0, 0.5)
+    -- position just left of ClientName
+    MinimizeHeaderBtn.Position = UDim2.new(0, 8, 0.055, 0)
+    MinimizeHeaderBtn.AutoButtonColor = false
+    MinimizeHeaderBtn.ZIndex = 5
+    MinimizeHeaderBtn.Parent = Handler
+
+
     local UIGradient = Instance.new('UIGradient')
     UIGradient.Color = ColorSequence.new{
         ColorSequenceKeypoint.new(0, ThemeColors.PrimaryLight),
@@ -924,11 +940,65 @@ function Library:create_ui()
     Sections.Name = 'Sections'
     Sections.Parent = Handler
     
-    -- Minimize button removed; minimize is triggered via Insert key or double-click on ClientName
+    local Minimize = Instance.new('TextButton')
+    Minimize.FontFace = Font.new('rbxasset://fonts/families/SourceSansPro.json', Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+    Minimize.TextColor3 = Color3.fromRGB(0, 0, 0)
+    Minimize.BorderColor3 = Color3.fromRGB(0, 0, 0)
+    Minimize.Text = ''
+    Minimize.AutoButtonColor = false
+    Minimize.Name = 'Minimize'
+    Minimize.BackgroundTransparency = 1
+    Minimize.Position = UDim2.new(0.020057305693626404, 0, 0.02922755666077137, 0)
+    Minimize.Size = UDim2.new(0, 24, 0, 24)
+    Minimize.BorderSizePixel = 0
+    Minimize.TextSize = 14
+    Minimize.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Minimize.Parent = Handler
     
     local UIScale = Instance.new('UIScale')
-    UIScale.Parent = Container    
-    
+    UIScale.Parent = Container
+
+    -- Minimized bar (only visible when UI is collapsed)
+    local MinimizeBar = Instance.new('Frame')
+    MinimizeBar.Name = 'MinimizeBar'
+    MinimizeBar.Size = UDim2.new(1, 0, 1, 0)
+    MinimizeBar.Position = UDim2.new(0, 0, 0, 0)
+    MinimizeBar.BackgroundColor3 = ThemeColors.Background
+    MinimizeBar.BorderSizePixel = 0
+    MinimizeBar.Visible = false
+    MinimizeBar.Parent = Container
+
+    local MinimizeBarCorner = Instance.new('UICorner')
+    MinimizeBarCorner.CornerRadius = UDim.new(0, 14)
+    MinimizeBarCorner.Parent = MinimizeBar
+
+    -- Unminimize image button on the LEFT
+    local UnminimizeBtn = Instance.new('ImageButton')
+    UnminimizeBtn.Name = 'UnminimizeBtn'
+    UnminimizeBtn.Image = 'rbxassetid://83223115676135'
+    UnminimizeBtn.ImageColor3 = ThemeColors.PrimaryLight
+    UnminimizeBtn.BackgroundTransparency = 1
+    UnminimizeBtn.BorderSizePixel = 0
+    UnminimizeBtn.Size = UDim2.fromOffset(28, 28)
+    UnminimizeBtn.Position = UDim2.new(0, 10, 0.5, 0)
+    UnminimizeBtn.AnchorPoint = Vector2.new(0, 0.5)
+    UnminimizeBtn.AutoButtonColor = false
+    UnminimizeBtn.Parent = MinimizeBar
+
+    -- 'zzv' label
+    local MinimizeBarLabel = Instance.new('TextLabel')
+    MinimizeBarLabel.Name = 'MinimizeBarLabel'
+    MinimizeBarLabel.Text = 'zzv'
+    MinimizeBarLabel.TextColor3 = ThemeColors.PrimaryLight
+    MinimizeBarLabel.BackgroundTransparency = 1
+    MinimizeBarLabel.FontFace = Font.new('rbxasset://fonts/families/GothamSSm.json', Enum.FontWeight.Bold, Enum.FontStyle.Normal)
+    MinimizeBarLabel.TextSize = 15
+    MinimizeBarLabel.Size = UDim2.new(1, -50, 1, 0)
+    MinimizeBarLabel.Position = UDim2.new(0, 40, 0, 0)
+    MinimizeBarLabel.TextXAlignment = Enum.TextXAlignment.Left
+    MinimizeBarLabel.BorderSizePixel = 0
+    MinimizeBarLabel.Parent = MinimizeBar
+
     self._ui = zzv
 
     local _minimize_pressing = false
@@ -995,8 +1065,11 @@ function Library:create_ui()
         zzv.Enabled = not zzv.Enabled
     end
 
+
     function self:change_visiblity(state)
         if state then
+            MinimizeBar.Visible = false
+            Handler.Visible = true
             TweenService:Create(Container, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
                 Size = UDim2.fromOffset(698, 479)
             }):Play()
@@ -1004,8 +1077,14 @@ function Library:create_ui()
             TweenService:Create(Container, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
                 Size = UDim2.fromOffset(104.5, 52)
             }):Play()
+            task.delay(0.1, function()
+                Handler.Visible = false
+                MinimizeBar.Visible = true
+            end)
         end
     end
+
+
     
     function self:load()
         local content = {}
@@ -3520,6 +3599,24 @@ function Library:create_ui()
 
         self._ui_open = not self._ui_open
         self:change_visiblity(self._ui_open)
+    end)
+
+    -- Minimize button click
+    Minimize.MouseButton1Click:Connect(function()
+        self._ui_open = not self._ui_open
+        self:change_visiblity(self._ui_open)
+    end)
+
+    -- Unminimize bar button
+    UnminimizeBtn.MouseButton1Click:Connect(function()
+        self._ui_open = true
+        self:change_visiblity(true)
+    end)
+
+    -- Header minimize button (left of zzv label)
+    MinimizeHeaderBtn.MouseButton1Click:Connect(function()
+        self._ui_open = false
+        self:change_visiblity(false)
     end)
 
     -- Double-click ClientName to minimize
